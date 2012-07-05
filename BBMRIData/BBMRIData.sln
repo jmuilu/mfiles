@@ -10,8 +10,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSVImportExample", "..\CSVImportExample\CSVImportExample\CSVImportExample.csproj", "{A72B492C-C363-4118-B574-1A1E95D726D4}"
-EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = BBMRIData.vsmdi
@@ -35,16 +33,6 @@ Global
 		{387C98D3-86BA-450E-8BE1-FE273A182640}.Release|Mixed Platforms.Build.0 = Release|x86
 		{387C98D3-86BA-450E-8BE1-FE273A182640}.Release|x86.ActiveCfg = Release|x86
 		{387C98D3-86BA-450E-8BE1-FE273A182640}.Release|x86.Build.0 = Release|x86
-		{A72B492C-C363-4118-B574-1A1E95D726D4}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{A72B492C-C363-4118-B574-1A1E95D726D4}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{A72B492C-C363-4118-B574-1A1E95D726D4}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{A72B492C-C363-4118-B574-1A1E95D726D4}.Debug|x86.ActiveCfg = Debug|x86
-		{A72B492C-C363-4118-B574-1A1E95D726D4}.Debug|x86.Build.0 = Debug|x86
-		{A72B492C-C363-4118-B574-1A1E95D726D4}.Release|Any CPU.ActiveCfg = Release|x86
-		{A72B492C-C363-4118-B574-1A1E95D726D4}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{A72B492C-C363-4118-B574-1A1E95D726D4}.Release|Mixed Platforms.Build.0 = Release|x86
-		{A72B492C-C363-4118-B574-1A1E95D726D4}.Release|x86.ActiveCfg = Release|x86
-		{A72B492C-C363-4118-B574-1A1E95D726D4}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
