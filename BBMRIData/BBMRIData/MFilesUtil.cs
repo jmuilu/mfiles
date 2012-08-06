@@ -38,7 +38,7 @@ namespace BBMRIData
             int[] iPropDefIDs, 
             string[] szSelectedColumns, int iTiteProperty, string[] szTitleName )
         {
-            int DBUG = 2;
+            int DBUG = 10;
 
             if (iPropDefIDs.Length != szSelectedColumns.Length)
             {
@@ -86,37 +86,53 @@ namespace BBMRIData
                 int[] iSelectedColumns = new int[ szSelectedColumns.Length ];
                 int[] iTitleColumns = new int[szTitleName.Length];
 
-                int j = 0;
-                int h = 0;
+                MFilesUtil.InitIntArray(iSelectedColumns);
+                MFilesUtil.InitIntArray(iTitleColumns);
+
                 for (int i = 0; i < headers.Length; i++)
                 {
-                    foreach (string v in szSelectedColumns)
+                    for (int j = 0; j < szSelectedColumns.Length ; j++)
                     {
-                        if (String.Equals(v, headers[i] ))
+                        if (String.Equals(szSelectedColumns[ j], headers[i] ))
                         {
+                            if (iSelectedColumns[j] != -1)
+                            {
+                                throw new Exception("Column "+szSelectedColumns[j]+" is given more than once" );
+                            }
                             iSelectedColumns[ j] = i; //save position of selected column in flat file
-                            j++;
                             break;
                         }
                     }
-                    foreach (string v in szTitleName)
+                    for (int h = 0; h < szTitleName.Length; h++ ) //vector here since we may support composite keys in future
                     {
-                        if (String.Equals(v, headers[i]))
+                        if (String.Equals(szTitleName[h], headers[i]))
                         {
+                            if (iTitleColumns[h] != -1)
+                            {
+                                throw new Exception("Title column " + szTitleName[h] + " is given more than once");
+                            }
                             iTitleColumns[h] = i; //save position of selected column in flat file
-                            h++;
                             break;
                         }
                     }
                 }
-                if (j != szSelectedColumns.Length)
+
+                for (int j = 0; j < iSelectedColumns.Length; j++)
                 {
-                    throw new Exception("Selected columns were not correct... check column headers");
+                    if (iSelectedColumns[j] == -1)
+                    {
+                        throw new Exception("Column " + szSelectedColumns[j] + " is not selected");
+                    }
                 }
-                if (h != szTitleName.Length)
+
+                for (int j = 0; j < iTitleColumns.Length; j++)
                 {
-                    throw new Exception("Selected columns were not correct... check column headers for title");
+                    if (iTitleColumns[j] == -1)
+                    {
+                        throw new Exception("Column " + szTitleName[j] + " is not selected");
+                    }
                 }
+
                 while ((line = file.ReadLine()) != null)
                 {
                     string[] values = line.Split(cDelimiter);
@@ -124,19 +140,21 @@ namespace BBMRIData
                     for( int i = 0; i < selectedValues.Length ; i++ ) 
                     {
                         selectedValues[i] = values[iSelectedColumns[i] ]; //take values from selected columns
-                        
+                        Console.WriteLine(iSelectedColumns[i] + " " + szSelectedColumns[i] + " " + selectedValues[i] + " " + iPropDefIDs[i]);
                     }
+
                     string lookupTitle = createLookupTitle(selectedValues, iTitleColumns);
-                    ObjectVersion find = MFilesUtil.MF_GetTheLatestVisibleObjectVersionByTitle(oVault, iObjClass, lookupTitle);
-                    if (find == null)
+                    ObjectVersion find = MFilesUtil.MF_GetLatestVisibleObjectVersionByTitle(oVault, iObjClass, lookupTitle);
+                    if (find == null) 
                     {
+                        //create and insert new object into database
                         this.createObject(iWorkFow,iState, iObjType, iObjClass, oPropDefs, selectedValues, iTiteProperty,lookupTitle);
                     }
                     else
                     {
-                        //Console.Out.WriteLine(lookupTitle + " already loaded ");
-                        oVault.ObjectOperations.RemoveObject(find.ObjVer.ObjID);
-                        this.createObject(iWorkFow, iState, iObjType, iObjClass, oPropDefs, selectedValues, iTiteProperty, lookupTitle);
+                        Console.Out.WriteLine(lookupTitle + " already loaded ");
+                        //oVault.ObjectOperations.RemoveObject(find.ObjVer.ObjID); // add otional update
+                        //this.createObject(iWorkFow, iState, iObjType, iObjClass, oPropDefs, selectedValues, iTiteProperty, lookupTitle);
                     }
                     if (DBUG-- == 0)
                     {
@@ -162,7 +180,7 @@ namespace BBMRIData
         {
             PropertyValues props = new PropertyValues();
 
-            //Create Class Property Deliberatley // ask: to link ObjectType to its class ?
+            //Create Class Property Deliberatley 
             PropertyValue classProp = new PropertyValue();
             classProp.PropertyDef = (int)MFBuiltInPropertyDef.MFBuiltInPropertyDefClass;
             classProp.Value.SetValue(MFDataType.MFDatatypeLookup, iObjClass);
@@ -185,7 +203,7 @@ namespace BBMRIData
                     }
                     else
                     {
-                        find = MFilesUtil.MF_GetTheLatestVisibleObjectVersionByTitle(oVault, oPropDefs[i].LookupID, values[i]);
+                        find = MFilesUtil.MF_GetLatestVisibleObjectVersionByTitle(oVault, oPropDefs[i].LookupID, values[i]);
                         if (find == null)
                         {
                             throw new Exception("Cannot create object. Lookup value is missing. ID=" + values[i] + " ObjectClass ID=" + oPropDefs[i].LookupID);
@@ -407,7 +425,13 @@ namespace BBMRIData
     class MFilesUtil
     {
 
-
+        static public void InitIntArray(int[] arr)
+        {
+            for (int i = 0; i < arr.Length; i++)
+            {
+                arr[i] = -1;
+            }
+        }
 
         static public int MF_GetTheClassIDByName(MFilesAPI.Vault oVault, MFilesAPI.MFConditionType eCondition, string szClassName)
         {
@@ -496,23 +520,29 @@ namespace BBMRIData
         static public MFilesAPI.ObjectVersion MF_GetTheLatestVisibleObjectVersionByTitle(MFilesAPI.Vault oVault, int iID, string szTitle)
         {
 
+            ObjectVersion oObjVersion = MF_GetLatestVisibleObjectVersionByTitle(oVault,iID,szTitle); 
+            if (oObjVersion == null)
+            {
+                throw new Exception("Object "+szTitle+" not found. ID="+iID);
+            }
+            return oObjVersion;
+        }
+
+        static public MFilesAPI.ObjectVersion MF_GetLatestVisibleObjectVersionByTitle(MFilesAPI.Vault oVault, int iID, string szTitle)
+        {
+
             MFilesAPI.ObjectSearchResults oObjectVersions = MF_GetLatestVisibleObjectsByTitle(oVault, iID, (int)MFilesAPI.MFBuiltInPropertyDef.MFBuiltInPropertyDefNameOrTitle, szTitle);
-            ObjectVersion oObjVersion = null; 
+            ObjectVersion oObjVersion = null;
             foreach (ObjectVersion oV in oObjectVersions)
             {
-                if (oV.LatestCheckedInVersionOrCheckedOutVersion && ! oV.Deleted)
+                if (oV.LatestCheckedInVersionOrCheckedOutVersion && !oV.Deleted)
                 {
                     if (oObjVersion != null)
                     {
-                        throw new Exception("MFilesUtil: Object title " + szTitle + " not unique. Created "+oV.LastModifiedUtc.ToLongTimeString()+" "+oObjVersion.LastModifiedUtc.ToLongTimeString());
+                        throw new Exception("MFilesUtil: Object title " + szTitle + " not unique. Created " + oV.LastModifiedUtc.ToLongTimeString() + " " + oObjVersion.LastModifiedUtc.ToLongTimeString());
                     }
                     oObjVersion = oV;
                 }
-            }
-            if (oObjVersion == null)
-            {
-                //not tested
-                throw new Exception("Object "+szTitle+" not found. ID="+iID);
             }
             return oObjVersion;
         }

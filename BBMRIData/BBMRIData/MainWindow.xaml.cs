@@ -97,7 +97,7 @@ namespace BBMRIData
 
                     DataLoader ldr = new DataLoader(oSelectedVault);
 
-                    if (basicData != null)
+                    if (false && basicData != null)
                     {
                         ldr.load(MF_WORKFLOWS.PATIENT_STATE,MF_STATES.CONSENTED, basicData, MF_OTYPE.PARTICIPANT, MF_CLASS.PARTICIPANT,
                             new int[] { MF_PTYPE.LOCAL_PARTICIPANT_ID, MF_PTYPE.GENDER, MF_PTYPE.BIOBANK },
@@ -108,15 +108,15 @@ namespace BBMRIData
                     }
                     else
                     {
-                        throw new Exception("Basic file not found");
+                        //throw new Exception("Basic file not found");
 
                     }
-                    if (false && diagnosisData != null)
+                    if (diagnosisData != null)
                     {
 
                         ldr.load(-1,-1,diagnosisData, MF_OTYPE.SAMPLE, MF_CLASS.SAMPLE,
-                            new int[] { MF_PTYPE.LOCAL_SAMPLE_ID, MF_PTYPE.ORGAN_SNOMED, MF_PTYPE.ORGAN_TEXT, MF_PTYPE.TITLE_PARTICIPANT },
-                            new string[] { "sample", "organ_snomed", "organ_text", "bbmri_participant@" + MF_CLASS.PARTICIPANT }, // participant is lookup column
+                            new int[] { MF_PTYPE.LOCAL_SAMPLE_ID, MF_PTYPE.ORGAN_SNOMED, MF_PTYPE.ORGAN_TEXT, MF_PTYPE.PARTICIPANT },
+                            new string[] { "sample", "organ_snomed", "organ_text", "bbmri_participant@" + MF_CLASS.PARTICIPANT +"@"+ MF_TYPE.OBJECT }, // participant is lookup column
                             MF_PTYPE.TITLE_SAMPLE,
                             new string[] { "bbmri_sample_id" }); // TITLE_SAMPLE
 
